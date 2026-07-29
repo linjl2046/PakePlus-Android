@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多整数加减法（含负数）</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", "PingFang SC", Roboto, "Helvetica Neue", sans-serif;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #e9f0f5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 30px 28px 35px;
+            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.15), 0 8px 24px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.2s;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a2b3c;
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+        h1 small {
+            font-size: 14px;
+            font-weight: 400;
+            color: #5e7a93;
+            margin-left: auto;
+        }
+        .n-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0 12px 0;
+            flex-wrap: wrap;
+        }
+        .n-selector label {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        .n-btn {
+            background: #ffffff;
+            border: 1.5px solid #d5e0e9;
+            border-radius: 20px;
+            padding: 6px 18px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+        }
+        .n-btn:hover {
+            background: #eaf1f8;
+            border-color: #7a9bb8;
+        }
+        .n-btn.active {
+            background: #4a90d9;
+            color: #ffffff;
+            border-color: #4a90d9;
+            box-shadow: 0 2px 8px rgba(74, 144, 217, 0.3);
+        }
+        .n-btn.active:hover {
+            background: #3a7bc8;
+        }
+        .problem-area {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 20px 24px;
+            margin: 12px 0 16px 0;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+        }
+        .problem-label {
+            font-size: 17px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .problem-text {
+            font-size: 26px;
+            font-weight: 600;
+            color: #0b1e2e;
+            letter-spacing: 0.5px;
+            font-family: "Times New Roman", "CMU Serif", serif;
+            background: #f2f6fa;
+            padding: 2px 18px;
+            border-radius: 16px;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+        .input-area {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 14px 22px;
+            margin: 8px 0 16px 0;
+            border: 2px solid #d5e0e9;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.02);
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            font-size: 28px;
+            font-weight: 500;
+            color: #0b1e2e;
+            font-family: "Times New Roman", "CMU Serif", serif;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        .input-area:focus-within {
+            border-color: #4a90d9;
+            box-shadow: 0 0 0 4px rgba(74, 144, 217, 0.12);
+        }
+        .input-area .cursor-blink {
+            display: inline-block;
+            width: 2px;
+            height: 34px;
+            background: #4a90d9;
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+        .input-placeholder {
+            color: #a0b8cc;
+            font-weight: 400;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+        }
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin: 14px 0 12px 0;
+        }
+        .key {
+            background: #ffffff;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 0;
+            font-size: 24px;
+            font-weight: 500;
+            color: #1a2b3c;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+            transition: all 0.12s;
+            font-family: "Times New Roman", "CMU Serif", serif;
+            line-height: 1;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.9);
+            min-height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .key:hover {
+            background: #f0f5fb;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+        .key:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            background: #e4ecf5;
+        }
+        .key-equal {
+            background: #4a90d9;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(74, 144, 217, 0.35);
+            font-weight: 600;
+        }
+        .key-equal:hover {
+            background: #3a7bc8;
+            box-shadow: 0 6px 20px rgba(74, 144, 217, 0.4);
+        }
+        .key-equal:active {
+            background: #2d6bb0;
+        }
+        .key-back {
+            background: #f0f0f0;
+            color: #4a5b6e;
+            font-size: 26px;
+        }
+        .key-back:hover {
+            background: #e4e8ee;
+        }
+        .key-clear {
+            background: #fee8e8;
+            color: #b33c3c;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .key-clear:hover {
+            background: #fdd8d8;
+        }
+        .key-operator {
+            background: #eef4fa;
+            color: #2a4b6e;
+            font-weight: 600;
+        }
+        .key-operator:hover {
+            background: #e0e9f3;
+        }
+        .key-bracket {
+            background: #f2f0f7;
+            color: #5a4a7a;
+            font-weight: 500;
+        }
+        .key-bracket:hover {
+            background: #e8e4f0;
+        }
+        .key-number {
+            background: #ffffff;
+            font-weight: 600;
+        }
+        .key-number:hover {
+            background: #f2f7fc;
+        }
+        .result-area {
+            margin-top: 18px;
+            padding: 12px 20px;
+            border-radius: 20px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px 28px;
+            min-height: 54px;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+        .result-item {
+            font-size: 17px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .result-item .label {
+            font-weight: 400;
+            color: #6a7f94;
+        }
+        .result-item .value {
+            font-weight: 600;
+            font-size: 22px;
+            font-family: "Times New Roman", "CMU Serif", serif;
+            color: #0b1e2e;
+            background: #eef3f8;
+            padding: 0 14px;
+            border-radius: 12px;
+            line-height: 1.8;
+        }
+        .result-item .value.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+        .result-item .value.wrong {
+            background: #f8dddd;
+            color: #721c24;
+        }
+        .result-item .value.unknown {
+            background: #e9ecef;
+            color: #495057;
+        }
+        .badge {
+            font-size: 20px;
+            font-weight: 600;
+            padding: 4px 18px;
+            border-radius: 40px;
+            letter-spacing: 0.5px;
+        }
+        .badge.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge.wrong {
+            background: #f8dddd;
+            color: #721c24;
+        }
+        .badge.unknown {
+            background: #e9ecef;
+            color: #495057;
+        }
+        .footer-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+            gap: 12px;
+        }
+        .btn-new {
+            background: transparent;
+            border: 1.5px solid #b8ccdd;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #3a5a7a;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-new:hover {
+            background: #eaf1f8;
+            border-color: #7a9bb8;
+            color: #1a3a5a;
+        }
+        .btn-new:active {
+            transform: scale(0.96);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 18px 14px 22px;
+                border-radius: 28px;
+            }
+            .keyboard {
+                gap: 6px;
+            }
+            .key {
+                padding: 12px 0;
+                font-size: 20px;
+                min-height: 48px;
+                border-radius: 12px;
+            }
+            .problem-text {
+                font-size: 22px;
+                padding: 2px 12px;
+            }
+            .input-area {
+                font-size: 22px;
+                padding: 10px 14px;
+                min-height: 56px;
+            }
+            .result-item .value {
+                font-size: 18px;
+                padding: 0 10px;
+            }
+            .badge {
+                font-size: 16px;
+                padding: 2px 14px;
+            }
+            .container h1 {
+                font-size: 18px;
+            }
+            .n-btn {
+                padding: 4px 12px;
+                font-size: 14px;
+            }
+        }
+        @media (max-width: 420px) {
+            .keyboard {
+                gap: 4px;
+            }
+            .key {
+                font-size: 17px;
+                min-height: 40px;
+                padding: 8px 0;
+                border-radius: 10px;
+            }
+            .problem-text {
+                font-size: 18px;
+            }
+            .input-area {
+                font-size: 18px;
+                padding: 8px 10px;
+                min-height: 46px;
+            }
+            .container {
+                padding: 12px 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>
+            🧮 多整数加减法（含负数）
+            <small>点击下方符号构建算式</small>
+        </h1>
+
+        <!-- n 选择器 -->
+        <div class="n-selector">
+            <label>n =</label>
+            <button class="n-btn active" data-n="2">2</button>
+            <button class="n-btn" data-n="3">3</button>
+            <button class="n-btn" data-n="4">4</button>
+            <button class="n-btn" data-n="5">5</button>
+            <span style="margin-left: 12px; font-size: 14px; color: #5e7a93;">(点击切换项数)</span>
+        </div>
+
+        <!-- 第一行：题目 -->
+        <div class="problem-area" id="problemArea">
+            <span class="problem-label">📐 题目：</span>
+            <span class="problem-text" id="problemDisplay">点击「新题目」开始</span>
+        </div>
+
+        <!-- 第二行：空白方框（输入区） -->
+        <div class="input-area" id="inputArea">
+            <span class="input-placeholder" id="placeholder">点击下方符号输入…</span>
+            <span id="expressionDisplay" style="display:none; word-break:break-all;"></span>
+            <span class="cursor-blink" id="cursorBlink"></span>
+        </div>
+
+        <!-- 第三行：键盘（不含 "/"） -->
+        <div class="keyboard" id="keyboard">
+            <!-- 数字 1~9 -->
+            <button class="key key-number" data-value="1">1</button>
+            <button class="key key-number" data-value="2">2</button>
+            <button class="key key-number" data-value="3">3</button>
+            <button class="key key-number" data-value="4">4</button>
+            <button class="key key-number" data-value="5">5</button>
+            <button class="key key-number" data-value="6">6</button>
+            <button class="key key-number" data-value="7">7</button>
+            <button class="key key-number" data-value="8">8</button>
+            <button class="key key-number" data-value="9">9</button>
+            <button class="key key-number" data-value="0">0</button>
+            <!-- 运算符 & 括号 & 等号 & 退格 & 清空 -->
+            <button class="key key-operator" data-value="+">+</button>
+            <button class="key key-operator" data-value="-">−</button>
+            <button class="key key-bracket" data-value="(">(</button>
+            <button class="key key-bracket" data-value=")">)</button>
+            <button class="key key-equal" data-value="=" id="equalBtn">=</button>
+            <button class="key key-back" data-value="back" id="backBtn">⌫</button>
+            <button class="key key-clear" data-value="clear" id="clearBtn">✕ 清空</button>
+            <!-- 占位，保持网格整齐 (占3列) -->
+            <span style="grid-column: span 3;"></span>
+        </div>
+
+        <!-- 结果区域 -->
+        <div class="result-area" id="resultArea">
+            <div class="result-item">
+                <span class="label">✅ 你的算式结果 b =</span>
+                <span class="value unknown" id="resultB">—</span>
+            </div>
+            <div class="result-item">
+                <span class="label">🎯 判定</span>
+                <span class="badge unknown" id="judgeBadge">等待计算</span>
+            </div>
+            <div class="result-item" style="margin-left:auto;">
+                <button class="btn-new" id="newProblemBtn">✦ 新题目</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  1. 有理数 (Fraction) 类 —— 此处仅用于整数
+        // ============================================================
+        class Fraction {
+            constructor(num, den) {
+                if (den === 0) throw new Error('分母不能为0');
+                if (den < 0) { num = -num;
+                    den = -den; }
+                const g = Fraction._gcd(Math.abs(num), Math.abs(den));
+                this.num = num / g;
+                this.den = den / g;
+            }
+
+            static _gcd(a, b) {
+                while (b !== 0) { const t = a % b;
+                    a = b;
+                    b = t; }
+                return a;
+            }
+
+            add(other) {
+                return new Fraction(
+                    this.num * other.den + other.num * this.den,
+                    this.den * other.den
+                );
+            }
+
+            sub(other) {
+                return new Fraction(
+                    this.num * other.den - other.num * this.den,
+                    this.den * other.den
+                );
+            }
+
+            neg() {
+                return new Fraction(-this.num, this.den);
+            }
+
+            equals(other) {
+                return this.num === other.num && this.den === other.den;
+            }
+
+            toString() {
+                if (this.den === 1) return String(this.num);
+                return this.num + '/' + this.den;
+            }
+
+            static parse(s) {
+                s = s.trim();
+                if (s === '') return null;
+                let sign = 1;
+                if (s.startsWith('-')) { sign = -1;
+                    s = s.slice(1); }
+                if (s.startsWith('+')) { s = s.slice(1); }
+                const parts = s.split('/');
+                if (parts.length === 1) {
+                    const num = parseInt(parts[0], 10);
+                    if (isNaN(num)) return null;
+                    return new Fraction(sign * num, 1);
+                } else if (parts.length === 2) {
+                    const num = parseInt(parts[0], 10);
+                    const den = parseInt(parts[1], 10);
+                    if (isNaN(num) || isNaN(den) || den === 0) return null;
+                    return new Fraction(sign * num, den);
+                }
+                return null;
+            }
+
+            isInteger() {
+                return this.den === 1;
+            }
+        }
+
+        // ============================================================
+        //  2. 词法分析器 (Tokenizer)
+        // ============================================================
+        const TokenType = {
+            NUMBER: 'NUMBER',
+            FRACTION: 'FRACTION',
+            PLUS: 'PLUS',
+            MINUS: 'MINUS',
+            UNARY_MINUS: 'UNARY_MINUS',
+            LPAREN: 'LPAREN',
+            RPAREN: 'RPAREN',
+            EOF: 'EOF'
+        };
+
+        class Token {
+            constructor(type, value) {
+                this.type = type;
+                this.value = value;
+            }
+        }
+
+        function tokenize(input) {
+            const tokens = [];
+            let i = 0;
+            const len = input.length;
+
+            function readNumber() {
+                let start = i;
+                while (i < len && /[0-9]/.test(input[i])) i++;
+                return input.slice(start, i);
+            }
+
+            function isDigit(ch) { return /[0-9]/.test(ch); }
+
+            function isUnaryContext() {
+                if (tokens.length === 0) return true;
+                const last = tokens[tokens.length - 1];
+                return last.type === TokenType.LPAREN ||
+                    last.type === TokenType.PLUS ||
+                    last.type === TokenType.MINUS ||
+                    last.type === TokenType.UNARY_MINUS;
+            }
+
+            while (i < len) {
+                const ch = input[i];
+                if (ch === ' ') { i++; continue; }
+
+                if (isDigit(ch)) {
+                    const numStr = readNumber();
+                    if (i < len && input[i] === '/') {
+                        i++;
+                        if (i < len && isDigit(input[i])) {
+                            const denStr = readNumber();
+                            tokens.push(new Token(TokenType.FRACTION, numStr + '/' + denStr));
+                        } else {
+                            tokens.push(new Token(TokenType.NUMBER, numStr));
+                            tokens.push(new Token(TokenType.NUMBER, '/'));
+                        }
+                    } else {
+                        tokens.push(new Token(TokenType.NUMBER, numStr));
+                    }
+                    continue;
+                }
+
+                switch (ch) {
+                    case '+':
+                        tokens.push(new Token(TokenType.PLUS, '+'));
+                        i++;
+                        break;
+                    case '−':
+                    case '-':
+                        if (isUnaryContext()) {
+                            tokens.push(new Token(TokenType.UNARY_MINUS, '-'));
+                        } else {
+                            tokens.push(new Token(TokenType.MINUS, '-'));
+                        }
+                        i++;
+                        break;
+                    case '(':
+                        tokens.push(new Token(TokenType.LPAREN, '('));
+                        i++;
+                        break;
+                    case ')':
+                        tokens.push(new Token(TokenType.RPAREN, ')'));
+                        i++;
+                        break;
+                    default:
+                        i++;
+                        break;
+                }
+            }
+            tokens.push(new Token(TokenType.EOF, null));
+            return tokens;
+        }
+
+        // ============================================================
+        //  3. 表达式计算器
+        // ============================================================
+        function evaluateExpression(input) {
+            const eqIdx = input.indexOf('=');
+            const expr = eqIdx >= 0 ? input.slice(0, eqIdx).trim() : input.trim();
+            if (expr === '') return null;
+
+            const tokens = tokenize(expr);
+            const operandStack = [];
+            const operatorStack = [];
+
+            function applyOperator() {
+                if (operatorStack.length === 0) return;
+                const op = operatorStack.pop();
+                if (op.type === TokenType.UNARY_MINUS) {
+                    if (operandStack.length === 0) throw new Error('一元负号缺少操作数');
+                    const val = operandStack.pop();
+                    operandStack.push(val.neg());
+                    return;
+                }
+                if (operandStack.length < 2) throw new Error('操作数不足');
+                const b = operandStack.pop();
+                const a = operandStack.pop();
+                let result;
+                if (op.type === TokenType.PLUS) {
+                    result = a.add(b);
+                } else if (op.type === TokenType.MINUS) {
+                    result = a.sub(b);
+                } else {
+                    throw new Error('未知运算符: ' + op.type);
+                }
+                operandStack.push(result);
+            }
+
+            function precedence(type) {
+                if (type === TokenType.PLUS || type === TokenType.MINUS) return 1;
+                if (type === TokenType.UNARY_MINUS) return 3;
+                return 0;
+            }
+
+            let i = 0;
+            while (i < tokens.length) {
+                const token = tokens[i];
+                const type = token.type;
+
+                if (type === TokenType.NUMBER || type === TokenType.FRACTION) {
+                    let frac;
+                    if (type === TokenType.NUMBER) {
+                        frac = Fraction.parse(token.value);
+                    } else {
+                        frac = Fraction.parse(token.value);
+                    }
+                    if (!frac) throw new Error('无法解析数字: ' + token.value);
+                    operandStack.push(frac);
+                    i++;
+                } else if (type === TokenType.PLUS || type === TokenType.MINUS) {
+                    while (operatorStack.length > 0 &&
+                        operatorStack[operatorStack.length - 1].type !== TokenType.LPAREN &&
+                        precedence(operatorStack[operatorStack.length - 1].type) >= precedence(type)) {
+                        applyOperator();
+                    }
+                    operatorStack.push(token);
+                    i++;
+                } else if (type === TokenType.UNARY_MINUS) {
+                    operatorStack.push(token);
+                    i++;
+                } else if (type === TokenType.LPAREN) {
+                    operatorStack.push(token);
+                    i++;
+                } else if (type === TokenType.RPAREN) {
+                    while (operatorStack.length > 0 && operatorStack[operatorStack.length - 1].type !== TokenType.LPAREN) {
+                        applyOperator();
+                    }
+                    if (operatorStack.length === 0) throw new Error('括号不匹配');
+                    operatorStack.pop();
+                    i++;
+                } else if (type === TokenType.EOF) {
+                    break;
+                } else {
+                    i++;
+                }
+            }
+
+            while (operatorStack.length > 0) {
+                const op = operatorStack[operatorStack.length - 1];
+                if (op.type === TokenType.LPAREN) throw new Error('括号不匹配');
+                applyOperator();
+            }
+
+            if (operandStack.length === 0) return null;
+            if (operandStack.length > 1) throw new Error('表达式不完整');
+            return operandStack[0];
+        }
+
+        // ============================================================
+        //  4. 题目生成器（n个整数，加减交替）
+        // ============================================================
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateProblem(n) {
+            // 生成 n 个整数，范围 -20 ~ 20
+            const numbers = [];
+            for (let i = 0; i < n; i++) {
+                numbers.push(new Fraction(randInt(-20, 20), 1));
+            }
+
+            // 随机生成 n-1 个运算符（+ 或 -）
+            const ops = [];
+            for (let i = 0; i < n - 1; i++) {
+                ops.push(Math.random() < 0.5 ? '+' : '-');
+            }
+
+            // 计算最终答案：从左到右依次计算
+            let answer = numbers[0];
+            for (let i = 0; i < ops.length; i++) {
+                const next = numbers[i + 1];
+                if (ops[i] === '+') {
+                    answer = answer.add(next);
+                } else {
+                    answer = answer.sub(next);
+                }
+            }
+
+            // 构建显示字符串
+            let displayParts = [];
+            for (let i = 0; i < numbers.length; i++) {
+                let numStr = numbers[i].toString();
+                if (i === 0) {
+                    // 第一个数：如果是负数，直接显示，不加括号（如 -3）
+                    displayParts.push(numStr);
+                } else {
+                    // 后续数：如果为负数，加括号；否则正常显示
+                    if (numbers[i].num < 0) {
+                        displayParts.push('(' + numStr + ')');
+                    } else {
+                        displayParts.push(numStr);
+                    }
+                }
+                // 在数字后面添加运算符（除了最后一个）
+                if (i < ops.length) {
+                    displayParts.push(' ' + ops[i] + ' ');
+                }
+            }
+            const displayText = displayParts.join('') + ' = ?';
+
+            return {
+                numbers: numbers,
+                ops: ops,
+                answer: answer,
+                display: displayText,
+                raw: { numbers: numbers.map(f => f.toString()), ops: ops }
+            };
+        }
+
+        // ============================================================
+        //  5. UI 交互
+        // ============================================================
+        const problemDisplay = document.getElementById('problemDisplay');
+        const expressionDisplay = document.getElementById('expressionDisplay');
+        const placeholder = document.getElementById('placeholder');
+        const cursorBlink = document.getElementById('cursorBlink');
+        const resultB = document.getElementById('resultB');
+        const judgeBadge = document.getElementById('judgeBadge');
+        const newProblemBtn = document.getElementById('newProblemBtn');
+        const equalBtn = document.getElementById('equalBtn');
+        const backBtn = document.getElementById('backBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const nButtons = document.querySelectorAll('.n-btn');
+
+        let currentN = 2;          // 默认 n=2
+        let currentProblem = null;
+        let expression = '';
+        let lastResult = null;
+        let lastJudge = false;
+
+        // 更新 n 按钮激活状态
+        function setActiveN(n) {
+            nButtons.forEach(btn => {
+                const val = parseInt(btn.dataset.n, 10);
+                if (val === n) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // 更新输入显示
+        function updateInputDisplay() {
+            if (expression === '') {
+                placeholder.style.display = 'inline';
+                expressionDisplay.style.display = 'none';
+                expressionDisplay.textContent = '';
+            } else {
+                placeholder.style.display = 'none';
+                expressionDisplay.style.display = 'inline';
+                expressionDisplay.textContent = expression;
+            }
+        }
+
+        function appendChar(ch) {
+            if (ch === '=') {
+                calculateAndJudge();
+                return;
+            }
+            if (ch === 'back') {
+                expression = expression.slice(0, -1);
+                updateInputDisplay();
+                clearJudgeResult();
+                return;
+            }
+            if (ch === 'clear') {
+                expression = '';
+                updateInputDisplay();
+                clearJudgeResult();
+                return;
+            }
+            expression += ch;
+            updateInputDisplay();
+            clearJudgeResult();
+        }
+
+        function clearJudgeResult() {
+            resultB.textContent = '—';
+            resultB.className = 'value unknown';
+            judgeBadge.textContent = '等待计算';
+            judgeBadge.className = 'badge unknown';
+            lastResult = null;
+            lastJudge = false;
+        }
+
+        function calculateAndJudge() {
+            if (!currentProblem) {
+                alert('请先生成一道题目！');
+                return;
+            }
+            if (expression.trim() === '') {
+                alert('请先输入计算式！');
+                return;
+            }
+
+            try {
+                const result = evaluateExpression(expression);
+                if (result === null) {
+                    alert('无法计算该表达式，请检查格式。');
+                    return;
+                }
+
+                lastResult = result;
+                const isCorrect = result.equals(currentProblem.answer);
+
+                resultB.textContent = result.toString();
+                resultB.className = 'value ' + (isCorrect ? 'correct' : 'wrong');
+
+                if (isCorrect) {
+                    judgeBadge.textContent = '✅ 正确！';
+                    judgeBadge.className = 'badge correct';
+                } else {
+                    judgeBadge.textContent = '❌ 错误';
+                    judgeBadge.className = 'badge wrong';
+                }
+                lastJudge = isCorrect;
+
+            } catch (err) {
+                alert('计算错误: ' + err.message);
+                console.error(err);
+            }
+        }
+
+        function newProblem() {
+            currentProblem = generateProblem(currentN);
+            problemDisplay.textContent = currentProblem.display;
+            expression = '';
+            updateInputDisplay();
+            clearJudgeResult();
+            console.log('✅ 正确答案 (a) =', currentProblem.answer.toString());
+            console.log('📝 题目:', currentProblem.display);
+        }
+
+        function setupKeyboard() {
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => {
+                key.addEventListener('click', function(e) {
+                    const val = this.dataset.value;
+                    if (val) {
+                        appendChar(val);
+                    }
+                });
+                key.addEventListener('touchstart', function(e) {
+                    // 防止双击缩放
+                }, { passive: true });
+            });
+
+            // 键盘快捷键（不含 "/"）
+            document.addEventListener('keydown', function(e) {
+                const key = e.key;
+                if (key >= '0' && key <= '9') {
+                    e.preventDefault();
+                    appendChar(key);
+                    return;
+                }
+                if (key === '+') { e.preventDefault();
+                    appendChar('+'); return; }
+                if (key === '-') { e.preventDefault();
+                    appendChar('-'); return; }
+                if (key === '(') { e.preventDefault();
+                    appendChar('('); return; }
+                if (key === ')') { e.preventDefault();
+                    appendChar(')'); return; }
+                if (key === '=') { e.preventDefault();
+                    appendChar('='); return; }
+                if (key === 'Backspace') { e.preventDefault();
+                    appendChar('back'); return; }
+                if (key === 'Delete' || key === 'Escape') { e.preventDefault();
+                    appendChar('clear'); return; }
+                if (key === 'Enter') { e.preventDefault();
+                    appendChar('='); return; }
+            });
+
+            newProblemBtn.addEventListener('click', newProblem);
+
+            // n 按钮事件
+            nButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const n = parseInt(this.dataset.n, 10);
+                    if (n === currentN) return;
+                    currentN = n;
+                    setActiveN(currentN);
+                    newProblem(); // 重新生成题目
+                });
+            });
+        }
+
+        // 修正 appendChar 以支持 '=' 不加入表达式
+        const originalAppendChar = appendChar;
+        appendChar = function(ch) {
+            if (ch === '=') {
+                calculateAndJudge();
+                return;
+            }
+            if (ch === 'back') {
+                expression = expression.slice(0, -1);
+                updateInputDisplay();
+                clearJudgeResult();
+                return;
+            }
+            if (ch === 'clear') {
+                expression = '';
+                updateInputDisplay();
+                clearJudgeResult();
+                return;
+            }
+            expression += ch;
+            updateInputDisplay();
+            clearJudgeResult();
+        };
+        window.appendChar = appendChar;
+
+        function init() {
+            setupKeyboard();
+            setActiveN(currentN);
+            newProblem();
+            document.getElementById('inputArea').addEventListener('click', function() {});
+            setInterval(() => {}, 500);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+        console.log('🧮 多整数加减法（含负数）已加载！');
+        console.log('💡 提示: 点击下方按钮构建算式, 按 = 或 Enter 计算');
+        console.log('⌨️  键盘快捷键: 数字, +, -, (, ), Backspace, Delete, Enter');
+        console.log('📌 可通过上方 n 按钮切换项数');
+    </script>
+
+</body>
+</html>
