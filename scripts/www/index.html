@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>竖式乘法 · 自主输入 + 历史紧凑</title>
+    <style>
+        /* ===== 全局样式 ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 30px 40px 40px;
+            max-width: 880px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #2c3e50, #4a6fa5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== 控制栏 ===== */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px 16px;
+            background: #f8f9fc;
+            padding: 14px 18px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #e9edf4;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #34495e;
+            white-space: nowrap;
+        }
+
+        .control-group select,
+        .control-group input[type="number"] {
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 2px solid #dce1eb;
+            background-color: white;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            cursor: pointer;
+            outline: none;
+            width: 70px;
+            transition: border-color 0.2s;
+        }
+        .control-group select:hover,
+        .control-group input[type="number"]:hover {
+            border-color: #4a6fa5;
+        }
+        .control-group select:focus,
+        .control-group input[type="number"]:focus {
+            border-color: #4a6fa5;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+        .control-group input[type="number"] {
+            width: 80px;
+            -moz-appearance: textfield;
+        }
+        .control-group input[type="number"]::-webkit-outer-spin-button,
+        .control-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .control-group .input-hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            white-space: nowrap;
+        }
+
+        .btn {
+            padding: 6px 22px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #4a6fa5, #6a8fc7);
+            color: white;
+            box-shadow: 0 4px 12px rgba(74, 111, 165, 0.35);
+        }
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 111, 165, 0.45);
+        }
+        .btn-generate:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(74, 111, 165, 0.3);
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.35);
+            padding: 8px 32px;
+            font-size: 16px;
+        }
+        .btn-check:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.45);
+        }
+        .btn-check:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+        .btn-check:disabled {
+            background: #bdc3c7;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+            color: white;
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.35);
+            padding: 8px 24px;
+            font-size: 14px;
+        }
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(230, 126, 34, 0.45);
+        }
+        .btn-reset:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
+        }
+
+        .btn-clear-history {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.35);
+            padding: 6px 18px;
+            font-size: 13px;
+        }
+        .btn-clear-history:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.45);
+        }
+        .btn-clear-history:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-delete-single {
+            background: transparent;
+            border: none;
+            color: #e74c3c;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            transition: transform 0.15s, color 0.15s;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-delete-single:hover {
+            color: #c0392b;
+            transform: scale(1.2);
+            background: #fdedec;
+        }
+
+        /* ===== 竖式容器 ===== */
+        .vertical-container {
+            padding: 14px 8px 8px;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 2px solid #eef2f7;
+            min-height: 160px;
+            position: relative;
+            overflow-x: auto;
+            margin-bottom: 14px;
+        }
+
+        .vertical-container .placeholder {
+            text-align: center;
+            color: #b0b8c5;
+            font-size: 17px;
+            padding: 40px 0;
+            user-select: none;
+        }
+
+        .vertical-table {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            padding: 2px 0;
+            font-family: 'Courier New', 'Consolas', monospace;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            height: 44px;
+            margin: 0px 0;
+            padding: 0 4px;
+            gap: 2px;
+        }
+
+        .row .cell {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 19px;
+            font-weight: 600;
+            font-family: 'Courier New', 'Consolas', monospace;
+        }
+
+        .row .cell-empty {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+        }
+
+        .row .cell-symbol {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 21px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .row .cell-input {
+            width: 42px;
+            height: 42px;
+            border: 3px solid #34495e;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Courier New', 'Consolas', monospace;
+            color: #2c3e50;
+            background: #fafcff;
+            outline: none;
+            transition: all 0.2s ease;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .row .cell-input:focus {
+            border-color: #4a6fa5;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.25);
+            background: #ffffff;
+        }
+        .row .cell-input.readonly {
+            background: #eef2f7;
+            color: #2c3e50;
+            border-color: #b0b8c5;
+            cursor: default;
+        }
+        .row .cell-input.readonly:focus {
+            box-shadow: none;
+            border-color: #b0b8c5;
+        }
+
+        .row .cell-input.correct {
+            border-color: #27ae60;
+            background: #eafaf1;
+        }
+        .row .cell-input.wrong {
+            border-color: #e74c3c;
+            background: #fdedec;
+            animation: shake 0.4s ease;
+        }
+        .row .cell-input.highlight-correct {
+            border-color: #27ae60;
+            background: #d5f5e3;
+        }
+        .row .cell-input.highlight-wrong {
+            border-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-6px);
+            }
+            75% {
+                transform: translateX(6px);
+            }
+        }
+
+        .row-divider {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 4px;
+            margin: 1px 0;
+            gap: 2px;
+        }
+        .row-divider .divider-line {
+            height: 3px;
+            background: #2c3e50;
+            border-radius: 2px;
+            flex-shrink: 0;
+            width: 42px;
+        }
+
+        /* ===== 结果区域 + 计时器 ===== */
+        .result-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 2px;
+        }
+
+        .result-top {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px 20px;
+            width: 100%;
+        }
+
+        .timer-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            background: #f0f4fa;
+            padding: 4px 16px;
+            border-radius: 12px;
+            border: 2px solid #dce1eb;
+            font-family: 'Courier New', 'Consolas', monospace;
+            letter-spacing: 1px;
+            min-width: 100px;
+            justify-content: center;
+        }
+        .timer-display .timer-icon {
+            font-size: 20px;
+        }
+        .timer-display .timer-time {
+            min-width: 64px;
+            text-align: center;
+        }
+        .timer-display.running {
+            border-color: #4a6fa5;
+            background: #eaf0fa;
+        }
+        .timer-display.stopped {
+            border-color: #27ae60;
+            background: #eafaf1;
+        }
+
+        .result-message {
+            font-size: 18px;
+            font-weight: 700;
+            padding: 8px 24px;
+            border-radius: 12px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            flex: 1;
+            max-width: 380px;
+        }
+        .result-message.success {
+            color: #1a7a3a;
+            background: #d5f5e3;
+            border: 2px solid #27ae60;
+        }
+        .result-message.error {
+            color: #922b21;
+            background: #fadbd8;
+            border: 2px solid #e74c3c;
+        }
+        .result-message.idle {
+            color: #7f8c8d;
+            background: #f0f2f5;
+            border: 2px solid #dce1eb;
+        }
+        .result-message .icon {
+            font-size: 22px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 2px;
+        }
+
+        .stats {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 0px;
+            text-align: center;
+        }
+        .stats span {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* ===== 历史记录区域 (紧凑) ===== */
+        .history-section {
+            margin-top: 22px;
+            border-top: 2px dashed #dce1eb;
+            padding-top: 18px;
+        }
+
+        .history-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            gap: 8px 12px;
+        }
+
+        .history-header .left {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 16px;
+        }
+
+        .history-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .history-header h2 .badge {
+            background: #4a6fa5;
+            color: white;
+            font-size: 12px;
+            padding: 0 10px;
+            border-radius: 16px;
+            font-weight: 600;
+        }
+
+        .history-stats {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            background: #f0f4fa;
+            padding: 2px 12px;
+            border-radius: 16px;
+            border: 1px solid #dce1eb;
+        }
+
+        .history-stats .stat-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .history-stats .stat-item .num {
+            color: #4a6fa5;
+            min-width: 22px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .history-stats .stat-item .num.correct-num {
+            color: #27ae60;
+        }
+
+        .history-rate {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2c3e50;
+            background: #f0f4fa;
+            padding: 2px 12px;
+            border-radius: 16px;
+            border: 1px solid #dce1eb;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .history-rate .rate-value {
+            color: #27ae60;
+            min-width: 38px;
+            text-align: center;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .history-scroll {
+            max-height: 240px;
+            overflow-y: auto;
+            border-radius: 10px;
+            border: 1px solid #eef2f7;
+            background: #fafcff;
+        }
+
+        .history-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .history-scroll::-webkit-scrollbar-track {
+            background: #eef2f7;
+            border-radius: 8px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #b0b8c5;
+            font-size: 14px;
+            padding: 24px 0;
+            background: #f8f9fc;
+            border-radius: 10px;
+            border: 1px dashed #dce1eb;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 460px;
+        }
+
+        .history-table th {
+            background: #f0f4fa;
+            color: #2c3e50;
+            font-weight: 700;
+            padding: 6px 10px;
+            text-align: center;
+            border-bottom: 2px solid #dce1eb;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #e8edf5;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .history-table td {
+            padding: 5px 8px;
+            text-align: center;
+            border-bottom: 1px solid #eef2f7;
+            color: #34495e;
+            vertical-align: middle;
+            font-size: 12.5px;
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .history-table tr:hover td {
+            background: #f8f9fc;
+        }
+
+        .history-table .time-col {
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .history-table .action-col {
+            width: 36px;
+            text-align: center;
+            padding: 2px 4px;
+        }
+
+        .history-table .date-col {
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        /* ===== 状态标记：纯色圆点 (小) ===== */
+        .status-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            vertical-align: middle;
+            border: 1.5px solid transparent;
+            transition: transform 0.15s;
+        }
+        .status-dot.correct {
+            background: #27ae60;
+            border-color: #1e8449;
+            box-shadow: 0 0 0 1.5px rgba(39, 174, 96, 0.2);
+        }
+        .status-dot.wrong {
+            background: #e74c3c;
+            border-color: #b03a2e;
+            box-shadow: 0 0 0 1.5px rgba(231, 76, 60, 0.2);
+        }
+        .status-dot:hover {
+            transform: scale(1.2);
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px 10px 20px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .controls {
+                padding: 10px 12px;
+                gap: 8px 10px;
+            }
+            .control-group label {
+                font-size: 13px;
+            }
+            .control-group select,
+            .control-group input[type="number"] {
+                font-size: 13px;
+                padding: 4px 6px;
+                width: 60px;
+            }
+            .control-group input[type="number"] {
+                width: 70px;
+            }
+            .btn {
+                font-size: 13px;
+                padding: 5px 16px;
+            }
+            .btn-check {
+                padding: 6px 24px;
+                font-size: 14px;
+            }
+            .result-message {
+                font-size: 16px;
+                padding: 6px 18px;
+                min-height: 38px;
+            }
+            .vertical-container {
+                padding: 10px 4px;
+            }
+            .row .cell,
+            .row .cell-empty,
+            .row .cell-symbol,
+            .row .cell-input,
+            .row-divider .divider-line {
+                width: 34px;
+                height: 34px;
+            }
+            .row .cell-input {
+                font-size: 17px;
+                border-width: 2px;
+            }
+            .row .cell-symbol {
+                font-size: 18px;
+            }
+            .row {
+                height: 38px;
+                gap: 1.5px;
+            }
+            .row-divider {
+                gap: 1.5px;
+            }
+            .row-divider .divider-line {
+                height: 2.5px;
+            }
+            .timer-display {
+                font-size: 17px;
+                padding: 3px 12px;
+                min-width: 80px;
+            }
+            .history-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .history-header .left {
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+            .history-actions {
+                justify-content: stretch;
+            }
+            .history-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .history-table {
+                font-size: 12px;
+                min-width: 340px;
+            }
+            .history-table th,
+            .history-table td {
+                padding: 4px 6px;
+            }
+            .history-scroll {
+                max-height: 180px;
+            }
+            .history-stats {
+                font-size: 12px;
+                padding: 2px 10px;
+                gap: 4px 8px;
+            }
+            .history-rate {
+                font-size: 12px;
+                padding: 2px 10px;
+            }
+            .status-dot {
+                width: 12px;
+                height: 12px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .row .cell,
+            .row .cell-empty,
+            .row .cell-symbol,
+            .row .cell-input,
+            .row-divider .divider-line {
+                width: 28px;
+                height: 28px;
+            }
+            .row .cell-input {
+                font-size: 14px;
+                border-width: 2px;
+                border-radius: 5px;
+            }
+            .row .cell-symbol {
+                font-size: 15px;
+            }
+            .row {
+                height: 32px;
+                gap: 1px;
+            }
+            .row-divider {
+                gap: 1px;
+            }
+            .row-divider .divider-line {
+                height: 2px;
+            }
+            .container {
+                padding: 10px 4px 16px;
+            }
+            .controls {
+                padding: 6px 6px;
+                gap: 6px 6px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-group {
+                justify-content: center;
+            }
+            .btn-group {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .btn-group .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .timer-display {
+                font-size: 15px;
+                padding: 2px 10px;
+                min-width: 70px;
+            }
+            .result-top {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .result-message {
+                max-width: 100%;
+                font-size: 14px;
+                padding: 4px 12px;
+                min-height: 32px;
+            }
+            .history-stats {
+                font-size: 11px;
+                padding: 2px 8px;
+                gap: 4px 6px;
+            }
+            .history-rate {
+                font-size: 11px;
+                padding: 2px 8px;
+            }
+            .history-table {
+                font-size: 11px;
+                min-width: 280px;
+            }
+            .history-table th,
+            .history-table td {
+                padding: 3px 4px;
+            }
+            .btn-delete-single {
+                font-size: 14px;
+                width: 22px;
+                height: 22px;
+            }
+            .status-dot {
+                width: 10px;
+                height: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>✖️ 竖式乘法填空</h1>
+
+        <!-- ===== 控制栏 ===== -->
+        <div class="controls">
+            <div class="control-group">
+                <label>被乘数</label>
+                <select id="multiplicandDigits">
+                    <option value="1">1位</option>
+                    <option value="2" selected>2位</option>
+                    <option value="3">3位</option>
+                    <option value="4">4位</option>
+                </select>
+                <span class="input-hint">或</span>
+                <input type="number" id="customMultiplicand" placeholder="输入数字" min="1" max="9999" step="1">
+            </div>
+            <div class="control-group">
+                <label>乘数</label>
+                <select id="multiplierDigits">
+                    <option value="1">1位</option>
+                    <option value="2" selected>2位</option>
+                    <option value="3">3位</option>
+                    <option value="4">4位</option>
+                </select>
+                <span class="input-hint">或</span>
+                <input type="number" id="customMultiplier" placeholder="输入数字" min="1" max="9999" step="1">
+            </div>
+            <button class="btn btn-generate" id="generateBtn">🎲 生成题目</button>
+        </div>
+
+        <!-- ===== 竖式展示区 ===== -->
+        <div class="vertical-container" id="verticalContainer">
+            <div class="placeholder" id="placeholder">
+                👆 选择位数或输入数字后点击「生成题目」
+            </div>
+            <div class="vertical-table" id="verticalTable" style="display:none;"></div>
+        </div>
+
+        <!-- ===== 结果 + 计时器 ===== -->
+        <div class="result-area">
+            <div class="result-top">
+                <div class="timer-display running" id="timerDisplay">
+                    <span class="timer-icon">⏱️</span>
+                    <span class="timer-time" id="timerTime">00:00</span>
+                </div>
+                <div class="result-message idle" id="resultMessage">
+                    <span class="icon">📝</span> 填写方框后点击「确认答案」
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-check" id="checkBtn" disabled>✅ 确认答案</button>
+                <button class="btn btn-reset" id="resetBtn">🔄 清空重填</button>
+            </div>
+
+            <div class="stats" id="statsInfo">
+                方框总数: <span id="totalBoxes">0</span> &nbsp;|&nbsp; 已填: <span id="filledBoxes">0</span>
+            </div>
+        </div>
+
+        <!-- ===== 历史记录 ===== -->
+        <div class="history-section" id="historySection">
+            <div class="history-header">
+                <div class="left">
+                    <h2>
+                        📜 练习历史
+                        <span class="badge" id="historyCount">0</span>
+                    </h2>
+                    <div class="history-stats">
+                        <span class="stat-item">📊 总题 <span class="num" id="totalCount">0</span></span>
+                        <span class="stat-item">✅ 正确 <span class="num correct-num" id="correctCount">0</span></span>
+                    </div>
+                    <div class="history-rate">
+                        🎯 正确率 <span class="rate-value" id="historyRate">0%</span>
+                    </div>
+                </div>
+                <div class="history-actions">
+                    <button class="btn btn-clear-history" id="clearHistoryBtn">🗑️ 清除全部</button>
+                </div>
+            </div>
+            <div id="historyContent">
+                <div class="history-empty">暂无历史记录，完成练习后会自动保存 ✅</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            //  DOM 引用
+            // ============================================================
+            const multiplicandDigits = document.getElementById('multiplicandDigits');
+            const multiplierDigits = document.getElementById('multiplierDigits');
+            const customMultiplicand = document.getElementById('customMultiplicand');
+            const customMultiplier = document.getElementById('customMultiplier');
+            const generateBtn = document.getElementById('generateBtn');
+            const checkBtn = document.getElementById('checkBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const verticalContainer = document.getElementById('verticalContainer');
+            const verticalTable = document.getElementById('verticalTable');
+            const placeholder = document.getElementById('placeholder');
+            const resultMessage = document.getElementById('resultMessage');
+            const totalBoxesSpan = document.getElementById('totalBoxes');
+            const filledBoxesSpan = document.getElementById('filledBoxes');
+            const timerTime = document.getElementById('timerTime');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const historyContent = document.getElementById('historyContent');
+            const historyCount = document.getElementById('historyCount');
+            const historyRate = document.getElementById('historyRate');
+            const totalCount = document.getElementById('totalCount');
+            const correctCount = document.getElementById('correctCount');
+
+            // ============================================================
+            //  状态
+            // ============================================================
+            let currentData = null;
+            let inputBoxes = [];
+            let timerInterval = null;
+            let seconds = 0;
+            let isTimerRunning = false;
+            let isCompleted = false;
+
+            const STORAGE_KEY = 'vertical_multiplication_history';
+
+            // ============================================================
+            //  工具函数
+            // ============================================================
+            function randInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            function generateNumber(digits) {
+                if (digits === 1) return randInt(1, 9);
+                const first = randInt(1, 9);
+                let rest = '';
+                for (let i = 1; i < digits; i++) {
+                    rest += randInt(0, 9);
+                }
+                return parseInt(first + rest, 10);
+            }
+
+            function numberToDigits(num) {
+                return String(num).split('').map(Number);
+            }
+
+            function formatTime(sec) {
+                const m = String(Math.floor(sec / 60)).padStart(2, '0');
+                const s = String(sec % 60).padStart(2, '0');
+                return `${m}:${s}`;
+            }
+
+            // 获取当前时间，格式：MM-DD HH:MM:SS (去掉年份)
+            function getNowStr() {
+                const d = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const month = pad(d.getMonth() + 1);
+                const day = pad(d.getDate());
+                const hours = pad(d.getHours());
+                const minutes = pad(d.getMinutes());
+                const seconds = pad(d.getSeconds());
+                return `${month}-${day} ${hours}:${minutes}:${seconds}`;
+            }
+
+            function generateId() {
+                return Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            }
+
+            // 获取有效数字：先检查自定义输入，若有效则使用，否则根据下拉位数随机生成
+            function getMultiplicand() {
+                const customVal = parseInt(customMultiplicand.value.trim(), 10);
+                if (!isNaN(customVal) && customVal > 0 && customVal <= 9999) {
+                    return customVal;
+                }
+                const digits = parseInt(multiplicandDigits.value, 10);
+                return generateNumber(digits);
+            }
+
+            function getMultiplier() {
+                const customVal = parseInt(customMultiplier.value.trim(), 10);
+                if (!isNaN(customVal) && customVal > 0 && customVal <= 9999) {
+                    return customVal;
+                }
+                const digits = parseInt(multiplierDigits.value, 10);
+                return generateNumber(digits);
+            }
+
+            // ============================================================
+            //  计时器控制
+            // ============================================================
+            function startTimer() {
+                stopTimer();
+                seconds = 0;
+                timerTime.textContent = '00:00';
+                isTimerRunning = true;
+                isCompleted = false;
+                timerDisplay.className = 'timer-display running';
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    timerTime.textContent = formatTime(seconds);
+                }, 1000);
+            }
+
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                isTimerRunning = false;
+                timerDisplay.className = 'timer-display stopped';
+            }
+
+            function resetTimer() {
+                stopTimer();
+                seconds = 0;
+                timerTime.textContent = '00:00';
+                isCompleted = false;
+                timerDisplay.className = 'timer-display running';
+                startTimer();
+            }
+
+            function getElapsedSeconds() {
+                return seconds;
+            }
+
+            // ============================================================
+            //  历史记录管理
+            // ============================================================
+            function getHistory() {
+                try {
+                    const data = localStorage.getItem(STORAGE_KEY);
+                    return data ? JSON.parse(data) : [];
+                } catch {
+                    return [];
+                }
+            }
+
+            function saveHistoryRecord(record) {
+                const history = getHistory();
+                record.id = generateId();
+                history.push(record);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+                renderHistory();
+            }
+
+            function deleteHistoryRecord(id) {
+                let history = getHistory();
+                history = history.filter(item => item.id !== id);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+                renderHistory();
+            }
+
+            function clearHistory() {
+                localStorage.removeItem(STORAGE_KEY);
+                renderHistory();
+            }
+
+            function renderHistory() {
+                const history = getHistory();
+                const total = history.length;
+                const correct = history.filter(h => h.correct === true).length;
+                const rate = total === 0 ? 0 : Math.round((correct / total) * 100);
+
+                historyCount.textContent = total;
+                totalCount.textContent = total;
+                correctCount.textContent = correct;
+                historyRate.textContent = total === 0 ? '0%' : rate + '%';
+
+                if (total === 0) {
+                    historyContent.innerHTML = `<div class="history-empty">暂无历史记录，完成练习后会自动保存 ✅</div>`;
+                    return;
+                }
+
+                const reversed = [...history].reverse();
+                let html = `
+                    <div class="history-scroll">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>被乘数</th>
+                                    <th>乘数</th>
+                                    <th>用时</th>
+                                    <th>状态</th>
+                                    <th class="date-col">完成时间</th>
+                                    <th class="action-col">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                reversed.forEach((r) => {
+                    const num = history.length - history.indexOf(r);
+                    const dotClass = r.correct ? 'correct' : 'wrong';
+                    const dotTitle = r.correct ? '正确' : '错误';
+                    html += `
+                        <tr>
+                            <td>${num}</td>
+                            <td>${r.multiplicand}</td>
+                            <td>${r.multiplier}</td>
+                            <td class="time-col">${r.timeStr || formatTime(r.time)}</td>
+                            <td><span class="status-dot ${dotClass}" title="${dotTitle}"></span></td>
+                            <td class="date-col">${r.date}</td>
+                            <td class="action-col">
+                                <button class="btn-delete-single" data-id="${r.id}" title="删除此记录">✕</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table></div>`;
+                historyContent.innerHTML = html;
+            }
+
+            // ============================================================
+            //  核心逻辑：生成题目
+            // ============================================================
+            function generateProblem() {
+                const a = getMultiplicand();
+                const b = getMultiplier();
+                const aDigits = numberToDigits(a);
+                const bDigits = numberToDigits(b);
+                const multiplicandLen = aDigits.length;
+                const multiplierLen = bDigits.length;
+
+                const bReversed = [...bDigits].reverse();
+                const intermediateResults = bReversed.map((digit, index) => {
+                    const val = a * digit;
+                    return {
+                        digit: digit,
+                        value: val,
+                        digits: numberToDigits(val),
+                        shift: index,
+                    };
+                });
+
+                const finalValue = a * b;
+                const finalDigits = numberToDigits(finalValue);
+                const totalCols = multiplicandLen + multiplierLen;
+
+                return {
+                    a,
+                    b,
+                    aDigits,
+                    bDigits,
+                    multiplicandLen,
+                    multiplierLen,
+                    intermediateResults,
+                    finalValue,
+                    finalDigits,
+                    totalCols,
+                };
+            }
+
+            // ============================================================
+            //  渲染竖式
+            // ============================================================
+            function buildNumberCells(digits, totalCols, shiftRight, shiftLeft, readonly) {
+                const cells = [];
+                const numLen = digits.length;
+                const leftEmpty = totalCols - numLen - shiftRight - shiftLeft;
+                for (let i = 0; i < leftEmpty; i++) {
+                    cells.push({ type: 'empty' });
+                }
+                for (let i = 0; i < numLen; i++) {
+                    cells.push({ type: 'digit', value: digits[i], readonly });
+                }
+                for (let i = 0; i < shiftRight; i++) {
+                    cells.push({ type: 'empty' });
+                }
+                return cells;
+            }
+
+            function buildMultiplierCells(digits, totalCols, readonly) {
+                const cells = [];
+                const numLen = digits.length;
+                const leftEmpty = totalCols - numLen - 1;
+                for (let i = 0; i < leftEmpty; i++) {
+                    cells.push({ type: 'empty' });
+                }
+                cells.push({ type: 'symbol', value: '×' });
+                for (let i = 0; i < numLen; i++) {
+                    cells.push({ type: 'digit', value: digits[i], readonly });
+                }
+                return cells;
+            }
+
+            function renderProblem(data) {
+                const { aDigits, bDigits, totalCols, intermediateResults, finalDigits } = data;
+                const rows = [];
+
+                rows.push({
+                    type: 'multiplicand',
+                    cells: buildNumberCells(aDigits, totalCols, 0, 0, true)
+                });
+
+                rows.push({
+                    type: 'multiplier',
+                    cells: buildMultiplierCells(bDigits, totalCols, true)
+                });
+
+                rows.push({ type: 'divider', cols: totalCols });
+
+                intermediateResults.forEach((ir, idx) => {
+                    const cells = buildNumberCells(ir.digits, totalCols, ir.shift, 0, false);
+                    rows.push({ type: 'intermediate', shift: ir.shift, digits: ir.digits, cells, index: idx });
+                });
+
+                rows.push({ type: 'divider', cols: totalCols });
+
+                rows.push({
+                    type: 'final',
+                    cells: buildNumberCells(finalDigits, totalCols, 0, 0, false)
+                });
+
+                return rows;
+            }
+
+            function renderHTML(rows, data) {
+                let html = '';
+                const totalCols = data.totalCols;
+
+                rows.forEach((row, rowIndex) => {
+                    if (row.type === 'divider') {
+                        html += `<div class="row-divider">`;
+                        for (let i = 0; i < row.cols; i++) {
+                            html += `<div class="divider-line"></div>`;
+                        }
+                        html += `</div>`;
+                        return;
+                    }
+
+                    html += `<div class="row" data-row="${rowIndex}">`;
+                    row.cells.forEach((cell, cellIndex) => {
+                        if (cell.type === 'empty') {
+                            html += `<div class="cell-empty"></div>`;
+                        } else if (cell.type === 'symbol') {
+                            html += `<div class="cell-symbol">${cell.value}</div>`;
+                        } else if (cell.type === 'digit') {
+                            const readonlyAttr = cell.readonly ? 'readonly' : '';
+                            const cls = `cell-input${cell.readonly ? ' readonly' : ''}`;
+                            const val = cell.readonly ? cell.value : '';
+                            const dataAttrs =
+                                `data-row="${rowIndex}" data-col="${cellIndex}" data-value="${cell.value}"`;
+                            html +=
+                                `<input class="${cls}" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" ${readonlyAttr} value="${val}" ${dataAttrs} ${cell.readonly ? '' : 'autocomplete="off"'} spellcheck="false">`;
+                        }
+                    });
+                    html += `</div>`;
+                });
+
+                return html;
+            }
+
+            // ============================================================
+            //  交互：生成 & 渲染
+            // ============================================================
+            function generateAndRender() {
+                const data = generateProblem();
+                currentData = data;
+
+                const rows = renderProblem(data);
+                const html = renderHTML(rows, data);
+
+                verticalTable.innerHTML = html;
+                verticalTable.style.display = 'flex';
+                placeholder.style.display = 'none';
+
+                inputBoxes = [];
+                const inputs = verticalTable.querySelectorAll('.cell-input:not(.readonly)');
+                inputs.forEach((inp) => {
+                    inputBoxes.push(inp);
+                    inp.addEventListener('input', function(e) {
+                        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+                        updateStats();
+                        clearResultStyle();
+                        if (isCompleted) {
+                            isCompleted = false;
+                            timerDisplay.className = 'timer-display running';
+                            startTimer();
+                        }
+                    });
+                    inp.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const all = inputBoxes;
+                            const idx = all.indexOf(this);
+                            if (idx >= 0 && idx < all.length - 1) {
+                                all[idx + 1].focus();
+                            } else if (idx === all.length - 1) {
+                                if (!checkBtn.disabled) checkBtn.click();
+                            }
+                        }
+                        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            const all = inputBoxes;
+                            const idx = all.indexOf(this);
+                            if (e.key === 'ArrowRight' && idx < all.length - 1) {
+                                all[idx + 1].focus();
+                            } else if (e.key === 'ArrowLeft' && idx > 0) {
+                                all[idx - 1].focus();
+                            }
+                        }
+                    });
+                });
+
+                checkBtn.disabled = false;
+                updateStats();
+                clearAllHighlights();
+                setResultMessage('idle', '📝', '填写方框后点击「确认答案」');
+
+                isCompleted = false;
+                startTimer();
+
+                if (inputBoxes.length > 0) {
+                    setTimeout(() => inputBoxes[0].focus(), 100);
+                }
+            }
+
+            // ============================================================
+            //  辅助
+            // ============================================================
+            function updateStats() {
+                const total = inputBoxes.length;
+                let filled = 0;
+                inputBoxes.forEach(inp => { if (inp.value.trim() !== '') filled++; });
+                totalBoxesSpan.textContent = total;
+                filledBoxesSpan.textContent = filled;
+            }
+
+            function clearResultStyle() {
+                const msg = document.getElementById('resultMessage');
+                if (!msg.classList.contains('idle')) {
+                    msg.className = 'result-message idle';
+                    msg.innerHTML = '<span class="icon">📝</span> 填写方框后点击「确认答案」';
+                }
+            }
+
+            function setResultMessage(type, icon, text) {
+                const msg = document.getElementById('resultMessage');
+                msg.className = `result-message ${type}`;
+                msg.innerHTML = `<span class="icon">${icon}</span> ${text}`;
+            }
+
+            function clearAllHighlights() {
+                inputBoxes.forEach(inp => {
+                    inp.classList.remove('correct', 'wrong', 'highlight-correct', 'highlight-wrong');
+                });
+            }
+
+            // ============================================================
+            //  确认答案
+            // ============================================================
+            function confirmAnswers() {
+                if (!currentData) return;
+                if (inputBoxes.length === 0) return;
+
+                if (isCompleted) {
+                    setResultMessage('success', '🎉', '已经完成啦！点击「生成题目」继续练习吧');
+                    return;
+                }
+
+                let allFilled = true;
+                inputBoxes.forEach(inp => {
+                    if (inp.value.trim() === '') allFilled = false;
+                });
+                if (!allFilled) {
+                    setResultMessage('error', '⚠️', '请完成所有方框！');
+                    return;
+                }
+
+                let allCorrect = true;
+                inputBoxes.forEach(inp => {
+                    const val = inp.value.trim();
+                    const expected = inp.dataset.value;
+                    if (val === expected) {
+                        inp.classList.remove('wrong', 'highlight-wrong');
+                        inp.classList.add('correct', 'highlight-correct');
+                    } else {
+                        allCorrect = false;
+                        inp.classList.remove('correct', 'highlight-correct');
+                        inp.classList.add('wrong', 'highlight-wrong');
+                    }
+                });
+
+                stopTimer();
+                isCompleted = true;
+                timerDisplay.className = 'timer-display stopped';
+                const elapsed = getElapsedSeconds();
+
+                const record = {
+                    multiplicand: currentData.a,
+                    multiplier: currentData.b,
+                    multiplicandDigits: currentData.multiplicandLen,
+                    multiplierDigits: currentData.multiplierLen,
+                    time: elapsed,
+                    timeStr: formatTime(elapsed),
+                    date: getNowStr(),
+                    correct: allCorrect,
+                };
+                saveHistoryRecord(record);
+
+                if (allCorrect) {
+                    setResultMessage('success', '🎉', `🎊 完全正确！用时 ${formatTime(elapsed)}`);
+                } else {
+                    setResultMessage('error', '❌', `有错误，已记录错误（用时 ${formatTime(elapsed)}）`);
+                }
+            }
+
+            // ============================================================
+            //  重置
+            // ============================================================
+            function resetAll() {
+                inputBoxes.forEach(inp => {
+                    inp.value = '';
+                    inp.classList.remove('correct', 'wrong', 'highlight-correct', 'highlight-wrong');
+                });
+                updateStats();
+                setResultMessage('idle', '📝', '已清空，重新填写吧');
+                isCompleted = false;
+                startTimer();
+                if (inputBoxes.length > 0) {
+                    setTimeout(() => inputBoxes[0].focus(), 100);
+                }
+            }
+
+            // ============================================================
+            //  事件绑定
+            // ============================================================
+            generateBtn.addEventListener('click', generateAndRender);
+            checkBtn.addEventListener('click', confirmAnswers);
+            resetBtn.addEventListener('click', resetAll);
+            document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+
+            document.getElementById('historyContent').addEventListener('click', function(e) {
+                const target = e.target.closest('.btn-delete-single');
+                if (target) {
+                    const id = target.dataset.id;
+                    if (id) {
+                        deleteHistoryRecord(id);
+                    }
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!checkBtn.disabled) checkBtn.click();
+                }
+            });
+
+            // 当自定义输入框获得焦点时，可清空下拉选择（不强制）
+            // 但生成时优先使用自定义输入
+
+            // ============================================================
+            //  初始化
+            // ============================================================
+            window.addEventListener('DOMContentLoaded', function() {
+                multiplicandDigits.value = '2';
+                multiplierDigits.value = '2';
+                renderHistory();
+                generateAndRender();
+            });
+
+            window.__debug = {
+                generateAndRender,
+                currentData: () => currentData,
+                inputBoxes: () => inputBoxes,
+                getHistory,
+                clearHistory,
+                deleteHistoryRecord,
+            };
+
+        })();
+    </script>
+
+</body>
+</html>
